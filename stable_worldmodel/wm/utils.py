@@ -15,9 +15,19 @@ def save_pretrained(
     run_name: str,
     config: dict | None = None,
     config_key: str | None = None,
+    target: str | None = None,
     filename: str = 'weights.pt',
     cache_dir: str = None,
 ):
+    """Save model weights and a Hydra-instantiable config.json side-by-side.
+
+    If `target` is given, the saved config is wrapped as
+    ``{_target_: target, _recursive_: False, cfg: <config>}`` so that
+    ``hydra.utils.instantiate(saved_config)`` returns a constructed model
+    (the target callable should accept a single ``cfg`` arg).
+    Without `target`, the raw config is dumped (back-compat); in that case
+    `load_pretrained` requires the config to already contain a `_target_`.
+    """
     from omegaconf import OmegaConf
 
     ckpt_dir = get_cache_dir(cache_dir, sub_folder='checkpoints') / run_name
@@ -33,9 +43,11 @@ def save_pretrained(
     if config_key is not None and config_key in config:
         config = config[config_key]
 
-    config_path = ckpt_dir / 'config.json'
-
     config = OmegaConf.to_container(config, resolve=True)
+    if target is not None:
+        config = {'_target_': target, '_recursive_': False, 'cfg': config}
+
+    config_path = ckpt_dir / 'config.json'
     with open(config_path, 'w') as f:
         json.dump(config, f, indent=2)
 

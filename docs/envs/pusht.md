@@ -101,9 +101,11 @@ world.reset(options={'variation': ['all']})
 
 ## Datasets
 
-| Name | Episodes | Policy | Download |
-|------|----------|--------|----------|
-| `pusht_expert` | 1000 | Weak Expert | — |
+| Name | Episodes | Total steps | Episode length (min / median / max) | Source |
+|------|----------|-------------|--------------------------------------|--------|
+| `pusht_expert_train` | 18,685 | 2,336,736 | 49 / 123 / 246 | [`quentinll/lewm-pusht`](https://huggingface.co/datasets/quentinll/lewm-pusht) on HuggingFace |
+
+Columns: `pixels (224, 224, 3) uint8`, `state (7,) float32`, `proprio (4,) float32`, `action (2,) float32`, plus `episode_idx`, `step_idx`, `ep_offset`, `ep_len` indexing tables. Stored as a single `.h5` file (~44 GB on disk; ~352 GB uncompressed — pixels gzip-compress ~8×). The dataset has no goal column; goals are sampled at eval time from a future step of the same episode (see `eval._set_goal_state` in `scripts/plan/config/pusht.yaml`).
 
 ## Expert Policy
 
